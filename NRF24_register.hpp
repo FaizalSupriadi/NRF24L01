@@ -9,7 +9,7 @@
 #define REUSE_TX_PL          0xE3        //Wordt gebruikt voor PTX apparaten, hergebruik laatst verstuurde payload
 #define R_RX_PL_WID          0x60        //Leest RX payload wijdte
 #define W_ACK_PAYLOAD        0xA8        //Schrijft payload om met ACK packet te worden verstuurd
-#define W_TX_PAYLOAD_NO_ACK  0xB0        //Zet AUTOACK uit voor een specifiek packet
+#define W_TX_PAYLOAD_NOACK   0xB0        //Zet AUTOACK uit voor een specifiek packet
 #define NOP                  0xFF        //Geen operatie, kan gebruikt worden om het STATUS register te lezen
 
 //addresses
@@ -41,4 +41,51 @@
 #define FEATURE              0x1D        //Feature register
 
 //mnemonic
-#define
+#define MASK_RX_DR           6        //Mask interrupt caused by RX_DR
+#define MASK_TX_DS           5        //Mask interrupt caused by TX-DS
+#define MASK_MAX_RT          4        //Mask interrupt caused by MAX_RT
+#define EN_CRC               3        //Enable CRC. Forced high if one of the bits in the EN_AA is high
+#define CRCO                 2        //CRC encoding scheme
+#define PWR_UP               1        //1: POWER UP, 0: POWER DOWN
+#define PRIM_RX              0        //1: PRX, 0: PTX
+#define ENAA_P5              5        //Enable auto acknowledgment data pipe 5    
+#define ENAA_P4              4        //Enable auto acknowledgment data pipe 4
+#define ENAA_P3              3        //Enable auto acknowledgment data pipe 3
+#define ENAA_P2              2        //Enable auto acknowledgment data pipe 2
+#define ENAA_P1              1        //Enable auto acknowledgment data pipe 1
+#define ENAA_P0              0        //Enable auto acknowledgment data pipe 0
+#define ERX_P5               5        //Enable data pipe 5
+#define ERX_P4               4        //Enable data pipe 4
+#define ERX_P3               3        //Enable data pipe 3
+#define ERX_P2               2        //Enable data pipe 2
+#define ERX_P1               1        //Enable data pipe 1
+#define ERX_P0               0        //Enable data pipe 0
+#define AW                   0        //RX/TX address field width '00' - illegal, '01' - 3 bytes, '10' - 4 bytes, '11' - 5 bytes
+#define ARD                  4        //Auto Retransmit Delay
+#define ARC                  0        //Auto Retransmit Count
+#define CONT_WAVE            7        //Enables continuous carrier trasmit when high
+#define RF_DR_LOW            6        //Set RF data rate to 250kps
+#define PLL_LOCK             5        //Force PLL lock signal (only used in test)
+#define RF_DR_HIGH           4        //Select between the high speed data rates
+#define RF_PWR_LOW           1        //Set RF output power low
+#define RF_PWR_HIGH          2        //Set RF output power high
+#define RX_DR                6        //Data ready RX FIFO interrupt     
+#define TX_DS                5        //Data sent TX FIFO interrupt
+#define MAX_RT               4        //Maximum number of TX retransmits interrupt 
+#define RX_P_NO              1        //Data pipe number for the payload available for reading from RX_FIFO
+#define PLOS_CNT             4        //Count lost packets
+#define ARC_CNT              0        //Count retransmitted packets
+#define TX_REUSE             6        //Used for a PTX device
+#define TX_FULL              5        //TX FIFO full flag, 1: TX FIFO full, 0: Available locations in TX FIFO
+#define TX_EMPTY             4        //TX FIFO empty flag, 1: TX FIFO empty, 0: Data in TX FIFO
+#define RX_FULL              1        //RX FIFO full flag, 1: RX FIFO full, 0: Available locations in RX FIFO
+#define RX_EMPTY             0        //RX FIFO empty flag, 1: RX FIFO empty, 0: Data in RX FIFO
+#define DPL_P5               5        //Enable dynamic payload length data pipe 5
+#define DPL_P4               4        //Enable dynamic payload length data pipe 4
+#define DPL_P3               3        //Enable dynamic payload length data pipe 3
+#define DPL_P2               2        //Enable dynamic payload length data pipe 2
+#define DPL_P1               1        //Enable dynamic payload length data pipe 1
+#define DPL_P0               0        //Enable dynamic payload length data pipe 0
+#define EN_DPL               2        //Enables dynamic payload length
+#define EN_ACK_PAY           1        //Enables payload with ACK
+#define EN_DYN_ACK           0        //Enables the W_RX_PAYLOAD_NOACK command
