@@ -7,7 +7,10 @@ NRF24::NRF24( uint16_t ce, uint16_t csn ):
 {} 
 	
 uint8_t NRF24::read_register( uint8_t reg ){
+   uint8_t result;
    //use SPI to read a message
+   result = readSPI(NOP);
+   return result;
 }
 	
 uint8_t NRF24::write_register( uint8_t register, uint8_t value ){
