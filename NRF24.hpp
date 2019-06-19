@@ -5,12 +5,13 @@
 
 class NRF24 {
 protected:
+	hwlib::spi_bus & bus; 
 	uint16_t ce;
 	uint16_t csn;
 
 public:
     
-    NRF24( uint16_t ce, uint16_t csn); 
+    NRF24( hwlib::spi_bus & bus, uint16_t ce, uint16_t csn); 
 	
     uint8_t read_register(uint8_t reg);
 	
