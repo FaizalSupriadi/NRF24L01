@@ -25,6 +25,22 @@ public:
 
     void set_ce(bool x);
 
+    void start();
+
+    void write_pipe(uint8_t value);
+
+    void read_pipe();
+
+    void powerUp_tx();
+
+    void powerUp_rx();
+
+    void powerDown_rx();
+
+    void powerup();
+
+    void powerdown();
+
 };
 
 #endif // NRF24_HPP
