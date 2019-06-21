@@ -1,4 +1,3 @@
-
 //commando's
 #define R_REGISTER           0x00        //Leest commando en status registers, 5 bit register map address
 #define W_REGISTER           0x20        //Schrijft commando en status registers, 5 bit register map address. Uitvoerbaar in power down
@@ -64,9 +63,9 @@
 #define ARD                  4        //Auto Retransmit Delay
 #define ARC                  0        //Auto Retransmit Count
 #define CONT_WAVE            7        //Enables continuous carrier trasmit when high
-#define RF_DR_LOW            6        //Set RF data rate to 250kps
-#define PLL_LOCK             5        //Force PLL lock signal (only used in test)
-#define RF_DR_HIGH           4        //Select between the high speed data rates
+#define RF_DR_LOW            5        //Set RF data rate to 250kps
+#define PLL_LOCK             4        //Force PLL lock signal (only used in test)
+#define RF_DR_HIGH           3        //Select between the high speed data rates
 #define RF_PWR_LOW           1        //Set RF output power low
 #define RF_PWR_HIGH          2        //Set RF output power high
 #define RX_DR                6        //Data ready RX FIFO interrupt     
@@ -89,3 +88,8 @@
 #define EN_DPL               2        //Enables dynamic payload length
 #define EN_ACK_PAY           1        //Enables payload with ACK
 #define EN_DYN_ACK           0        //Enables the W_RX_PAYLOAD_NOACK command
+
+//defines values for the datatransfer speed
+#define RF24_250KBPS         32       
+#define RF24_2MBPS           8
+#define RF24_1MBPS           0
