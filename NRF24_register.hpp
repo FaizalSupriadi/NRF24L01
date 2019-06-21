@@ -88,8 +88,3 @@
 #define EN_DPL               2        //Enables dynamic payload length
 #define EN_ACK_PAY           1        //Enables payload with ACK
 #define EN_DYN_ACK           0        //Enables the W_RX_PAYLOAD_NOACK command
-
-//defines values for the datatransfer speed
-#define RF24_250KBPS         32       
-#define RF24_2MBPS           8
-#define RF24_1MBPS           0
