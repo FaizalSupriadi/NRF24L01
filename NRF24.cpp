@@ -129,3 +129,16 @@ void NRF24::setDataRate(uint8_t speed){
       write_register( RF_SETUP, ( read_register(RF_SETUP) | ( 1 << RF_DR_LOW  ) ) & ~( 1 << RF_DR_HIGH ) );
    }
 }
+
+hwlib::string<8> NRF24::getDataRate(){
+   uint8_t value = ( read_register(RF_SETUP) & 0x28 );
+   if( value == 0x20){
+      return "250Kbps";
+   }else if( value == 0x00){
+      return "1Mbps";
+   }else if( value == 0x10 ){
+      return "2Mbps";
+   }else{
+      return "reserved";
+   }
+}
