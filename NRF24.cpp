@@ -44,6 +44,22 @@ void NRF24::set_ce( bool x ){
 void NRF24::start(){
    set_ce( 0 );
    set_csn( 1 );
+
+   hwlib::wait_ms( 100 );
+
+   write_register( RF_SETUP, 0xFF & RF24_250KBPS );
+
+   write_register( FEATURE, 0 );
+   write_register( DYNPD, 0 );
+
+   write_register( STATUS, ( 1 << RX_DR) |( 1 << TX_DS ) | ( 1 << MAX_RT ) );
+
+   flush_rx();
+   flush_tx();
+
+   powerup();
+
+   write_register( CONFIG, read_register(CONFIG) | ( 0 << PRIM_RX ) );
 }
 
 void NRF24::write_pipe(uint8_t value){
@@ -62,7 +78,7 @@ void NRF24::read_pipe(){
 void NRF24::powerUp_tx(){
    set_ce( 0 );
    powerup();
-   write_register( read_register(CONFIG) | ( 0 << PRIM_RX ) );
+   write_register( CONFIG, read_register(CONFIG) | ( 0 << PRIM_RX ) );
    set_ce( 1 );
    write_register( STATUS, ( 1 << RX_DR) |( 1 << TX_DS ) | ( 1 << MAX_RT ) );
 }
@@ -83,10 +99,22 @@ void NRF24::powerDown_rx(){
 }
 
 void NRF24::powerup(){
-   write_register( CONFIG, read_register(CONFIG) | ( 1 << POWER_UP ) );
+   write_register( CONFIG, read_register(CONFIG) | ( 1 << PWR_UP ) );
 }
 
 void NRF24::powerdown(){
    set_ce( 0 );
-   write_register( CONFIG, read_register(CONFIG) & ( 0 << POWER_UP ) );
+   write_register( CONFIG, read_register(CONFIG) & ( 0 << PWR_UP ) );
+}
+
+void NRF24::flush_rx(){
+   bus.transaction( hwlib::pin_out_dummy ).write( FLUSH_RX );
+}
+
+void NRF24::flush_tx(){
+   bus.transaction( hwlib::pin_out_dummy ).write( FLUSH_TX );
+}
+
+uint8_t NRF24::read_setup(){
+   return read_register( RF_SETUP );
 }
