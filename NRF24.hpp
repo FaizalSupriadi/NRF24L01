@@ -41,6 +41,12 @@ public:
 
     void powerdown();
 
+    void flush_rx();
+
+    void flush_tx();
+
+    uint8_t read_setup();
+
 };
 
 #endif // NRF24_HPP
