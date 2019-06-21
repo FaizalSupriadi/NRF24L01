@@ -47,6 +47,8 @@ public:
 
     uint8_t read_setup();
 
+    void setDataRate(uint8_t speed);
+
 };
 
 #endif // NRF24_HPP
