@@ -49,6 +49,8 @@ public:
 
     void setDataRate(uint8_t speed);
 
+    hwlib::string<8> getDataRate();
+
 };
 
 #endif // NRF24_HPP
