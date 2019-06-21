@@ -1,7 +1,6 @@
 #include "NRF24.hpp"
 #include "NRF24_register.hpp"
 #include "hwlib.hpp"
-#include <array>
 
 NRF24::NRF24( hwlib::spi_bus & bus, hwlib::pin_out & ce, hwlib::pin_out & csn ):
    bus( bus ), ce( ce ), csn( csn )
@@ -47,7 +46,7 @@ void NRF24::start(){
 
    hwlib::wait_ms( 100 );
 
-   write_register( RF_SETUP, ( read_register(RF_SETUP) | ( 1 << RF_DR_LOW  ) ) & ~( 1 << RF_DR_HIGH ) );
+   setDataRate(0);
 
    write_register( FEATURE, 0 );
    write_register( DYNPD, 0 );
@@ -117,4 +116,16 @@ void NRF24::flush_tx(){
 
 uint8_t NRF24::read_setup(){
    return read_register( RF_SETUP );
+}
+
+void NRF24::setDataRate(uint8_t speed){
+   if(speed == 0){
+      write_register( RF_SETUP, ( read_register(RF_SETUP) | ( 1 << RF_DR_LOW  ) ) & ~( 1 << RF_DR_HIGH ) );
+   }else if(speed == 1){
+      write_register( RF_SETUP,  read_register(RF_SETUP) & ~( ( 1 << RF_DR_LOW  )  | ( 1 << RF_DR_HIGH ) ) );
+   }else if(speed == 2){
+      write_register( RF_SETUP, ( read_register(RF_SETUP) & ~( 1 << RF_DR_LOW  ) ) | ( 1 << RF_DR_HIGH ) );
+   }else{
+      write_register( RF_SETUP, ( read_register(RF_SETUP) | ( 1 << RF_DR_LOW  ) ) & ~( 1 << RF_DR_HIGH ) );
+   }
 }
