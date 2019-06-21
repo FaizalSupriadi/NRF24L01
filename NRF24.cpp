@@ -40,3 +40,53 @@ void NRF24::set_ce( bool x ){
    ce.write( x );
    ce.flush();
 }
+
+void NRF24::start(){
+   set_ce( 0 );
+   set_csn( 1 );
+}
+
+void NRF24::write_pipe(uint8_t value){
+   write_register( RX_ADDR_P0, value );
+   write_register( TX_ADDR, value );
+}
+
+void NRF24::read_pipe(){
+   uint8_t rx_addr = read_register( RX_ADDR_P0 );
+   uint8_t tx_addr = read_register( TX_ADDR );
+
+   hwlib::cout << "rx_addr: " << rx_addr << "\n" << hwlib::flush;
+   hwlib::cout << "tx_addr: " << tx_addr << "\n" << hwlib::flush;
+}
+
+void NRF24::powerUp_tx(){
+   set_ce( 0 );
+   powerup();
+   write_register( read_register(CONFIG) | ( 0 << PRIM_RX ) );
+   set_ce( 1 );
+   write_register( STATUS, ( 1 << RX_DR) |( 1 << TX_DS ) | ( 1 << MAX_RT ) );
+}
+
+void NRF24::powerUp_rx(){
+   set_ce( 0 );
+   powerup();
+   write_register( CONFIG, read_register(CONFIG) | ( 1 << PRIM_RX ) );
+   write_register( STATUS, ( 1 << RX_DR ) | ( 1 << TX_DS ) | ( 1 << MAX_RT ) );
+   set_ce( 1 );
+}
+
+void NRF24::powerDown_rx(){
+   set_ce( 0 );
+   powerdown();
+   write_register( CONFIG, read_register(CONFIG) | ( 0 << PRIM_RX ) );
+   powerdown();
+}
+
+void NRF24::powerup(){
+   write_register( CONFIG, read_register(CONFIG) | ( 1 << POWER_UP ) );
+}
+
+void NRF24::powerdown(){
+   set_ce( 0 );
+   write_register( CONFIG, read_register(CONFIG) & ( 0 << POWER_UP ) );
+}
