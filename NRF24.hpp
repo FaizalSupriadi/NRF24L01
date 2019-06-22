@@ -8,6 +8,7 @@ protected:
 	hwlib::spi_bus & bus; 
 	hwlib::pin_out & ce;
 	hwlib::pin_out & csn;
+	uint8_t payload_size;
 
 public:
     
