@@ -62,16 +62,13 @@ void NRF24::start(){
 }
 
 void NRF24::write_pipe(uint8_t value){
-   write_register( RX_ADDR_P0, value );
+   write_register( RX_ADDR_P1, value );
    write_register( TX_ADDR, value );
 }
 
 void NRF24::read_pipe(){
-   uint8_t rx_addr = read_register( RX_ADDR_P0 );
-   uint8_t tx_addr = read_register( TX_ADDR );
-
-   hwlib::cout << "rx_addr: " << rx_addr << "\n" << hwlib::flush;
-   hwlib::cout << "tx_addr: " << tx_addr << "\n" << hwlib::flush;
+   write_register( RX_PW_P1 ,payload_size );
+   write_register( EN_RXADDR, read_register( EN_RXADDR ) | ( 1 << ERX_P1 ) );
 }
 
 void NRF24::powerUp_tx(){
