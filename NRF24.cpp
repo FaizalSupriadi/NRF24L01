@@ -3,7 +3,7 @@
 #include "hwlib.hpp"
 
 NRF24::NRF24( hwlib::spi_bus & bus, hwlib::pin_out & ce, hwlib::pin_out & csn ):
-   bus( bus ), ce( ce ), csn( csn )
+   bus( bus ), ce( ce ), csn( csn ), payload_size( 1 )
 {} 
 	
 uint8_t NRF24::read_register( uint8_t reg){
