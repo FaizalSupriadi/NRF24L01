@@ -14,21 +14,21 @@ public:
     
     NRF24( hwlib::spi_bus & bus, hwlib::pin_out & ce, hwlib::pin_out & csn); 
 	
-    uint8_t read_register(uint8_t reg);
+    uint8_t read_register( uint8_t reg );
 	
-    void write_register(uint8_t reg, uint8_t value);
+    void write_register( uint8_t reg, uint8_t value );
 	
-    void setChannel(uint8_t channel);
+    void setChannel( uint8_t channel );
 	
     uint8_t getChannel();
 
-    void set_csn(bool x);
+    void set_csn( bool x );
 
-    void set_ce(bool x);
+    void set_ce( bool x );
 
     void start();
 
-    void write_pipe(uint8_t value);
+    void write_pipe( uint8_t value );
 
     void read_pipe();
 
@@ -48,9 +48,17 @@ public:
 
     uint8_t read_setup();
 
-    void setDataRate(uint8_t speed);
+    void setDataRate( uint8_t speed );
 
     hwlib::string<8> getDataRate();
+
+    void setOutputPower( uint8_t value );
+
+    void getOutputPower();
+
+    void write( uint8_t value );
+
+    void write_payload( uint8_t value );
 
 };
 
