@@ -134,6 +134,7 @@ void NRF24::setDataRate( uint8_t speed ){
 
 hwlib::string<8> NRF24::getDataRate(){
    uint8_t value = ( read_register(RF_SETUP) & 0x28 );
+
    if( value == 0x20){
       return "250Kbps";
    }else if( value == 0x00){
@@ -159,8 +160,20 @@ void NRF24::setOutputPower( uint8_t value ){
    }
 }
 
-void NRF24::getOutputPower(){
-   //for now empty
+hwlib::string<8> NRF24::getOutputPower(){
+   uint8_t value = read_register( RF_SETUP ) & 0x06;
+
+   if( value == 0x00 ){
+      return "-18dBm";
+   }else if( value == 0x02 ){
+      return "-12dBm";
+   }else if( value == 0x04 ){
+      return "-6dBm";
+   }else if( value == 0x06 ){
+      return "0dBm";
+   }else{
+      return "???";      
+   }
 }
 
 void NRF24::write( uint8_t value ){
