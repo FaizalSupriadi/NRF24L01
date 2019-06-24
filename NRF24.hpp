@@ -54,7 +54,7 @@ public:
 
     void setOutputPower( uint8_t value );
 
-    void getOutputPower();
+    hwlib::string<8> getOutputPower();
 
     void write( uint8_t value );
 
