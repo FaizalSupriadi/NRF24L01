@@ -6,7 +6,7 @@ NRF24::NRF24( hwlib::spi_bus & bus, hwlib::pin_out & ce, hwlib::pin_out & csn ):
    bus( bus ), ce( ce ), csn( csn ), payload_size( 1 )
 {} 
 	
-uint8_t NRF24::read_register( uint8_t reg){
+uint8_t NRF24::read_register( uint8_t reg ){
    set_csn(0);
    bus.transaction( hwlib::pin_out_dummy ).write( R_REGISTER | ( 0x1F & reg ) );
    uint8_t result = bus.transaction( hwlib::pin_out_dummy ).read_byte();
@@ -61,14 +61,18 @@ void NRF24::start(){
    write_register( CONFIG, read_register(CONFIG) & ~( 1 << PRIM_RX ) );
 }
 
-void NRF24::write_pipe(uint8_t value){
+void NRF24::write_pipe( uint8_t value ){
    write_register( RX_ADDR_P1, value );
    write_register( TX_ADDR, value );
+
+   write_register( RX_PW_P1, payload_size );
 }
 
 void NRF24::read_pipe(){
    write_register( RX_PW_P1 ,payload_size );
    write_register( EN_RXADDR, read_register( EN_RXADDR ) | ( 1 << ERX_P1 ) );
+
+   write_register( RX_PW_P1, payload_size );
 }
 
 void NRF24::powerUp_tx(){
@@ -91,7 +95,8 @@ void NRF24::powerDown_rx(){
    set_ce( 0 );
    powerdown();
    write_register( CONFIG, read_register(CONFIG) & ~( 1 << PRIM_RX ) );
-   powerdown();
+   write_register( EN_RXADDR, read_register( EN_RXADDR ) | ERX_P1 );    //testing purpose (does stand in other function, but I am not sure what they meant in the datasheets so I try it out)
+   powerup();
 }
 
 void NRF24::powerup(){
@@ -115,7 +120,7 @@ uint8_t NRF24::read_setup(){
    return read_register( RF_SETUP );
 }
 
-void NRF24::setDataRate(uint8_t speed){
+void NRF24::setDataRate( uint8_t speed ){
    if(speed == 0){
       write_register( RF_SETUP, ( read_register(RF_SETUP) | ( 1 << RF_DR_LOW  ) ) & ~( 1 << RF_DR_HIGH ) );
    }else if(speed == 1){
@@ -138,4 +143,36 @@ hwlib::string<8> NRF24::getDataRate(){
    }else{
       return "reserved";
    }
+}
+
+void NRF24::setOutputPower( uint8_t value ){
+   if( value == 0 ){
+      write_register( RF_SETUP, read_register( RF_SETUP ) & ~( 1 <<  RF_PWR_HIGH | 1 << RF_PWR_LOW ));
+   }else if( value == 1 ){
+      write_register( RF_SETUP, ( read_register( RF_SETUP ) | 1 << RF_PWR_LOW ) & ~( 1 <<  RF_PWR_HIGH ) );
+   }else if( value == 2 ){
+      write_register( RF_SETUP, ( read_register( RF_SETUP ) |  1 <<  RF_PWR_HIGH ) & ~( 1 << RF_PWR_LOW ));
+   }else if( value == 3 ){
+      write_register( RF_SETUP, read_register( RF_SETUP ) | ( 1 <<  RF_PWR_HIGH | 1 << RF_PWR_LOW ));
+   }else{
+      write_register( RF_SETUP, read_register( RF_SETUP ) & ~( 1 <<  RF_PWR_HIGH | 1 << RF_PWR_LOW ));
+   }
+}
+
+void NRF24::getOutputPower(){
+   //for now empty
+}
+
+void NRF24::write( uint8_t value ){
+   write_payload( value );
+   set_ce( 1 );
+   hwlib::wait_ns( 10000 );
+   set_ce( 0 );
+}
+
+void NRF24::write_payload( uint8_t value ){
+   set_csn(0);
+   bus.transaction( hwlib::pin_out_dummy ).write( ( W_TX_PAYLOAD_NOACK ) );
+   bus.transaction( hwlib::pin_out_dummy ).write( value );
+   set_csn(1);
 }
