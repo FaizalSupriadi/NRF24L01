@@ -18,16 +18,13 @@ int main( void ){
       sclk, mosi, miso );
 
    auto nrf = NRF24( spi_bus, ce, csn );
-   nrf.start();
-   nrf.setChannel( 100 );
-   nrf.read_pipe();                     
-   nrf.setOutputPower( 0 );
+   nrf.start();                   
+   nrf.read_pipe( 0x01 );                     
+   nrf.setOutputPower( 0 );                 
    nrf.powerUp_rx();
-
-   uint8_t value; 
-
+   
    for(;;){
-      value = nrf.read_register( RX_ADDR_P0 );
+      uint8_t value = nrf.read();
       hwlib::cout << "value: " << value << "\n" << hwlib::flush;
-   }   
+   }
 }
