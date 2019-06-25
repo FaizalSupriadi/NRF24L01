@@ -15,6 +15,8 @@ public:
     NRF24( hwlib::spi_bus & bus, hwlib::pin_out & ce, hwlib::pin_out & csn); 
 
     void transfer( uint8_t reg );
+
+    uint8_t read_byte();
 	
     uint8_t read_register( uint8_t reg );
 	
@@ -32,7 +34,7 @@ public:
 
     void write_pipe( uint8_t value );
 
-    void read_pipe();
+    void read_pipe( uint8_t address );
 
     void powerUp_tx();
 
