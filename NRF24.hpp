@@ -13,6 +13,8 @@ protected:
 public:
     
     NRF24( hwlib::spi_bus & bus, hwlib::pin_out & ce, hwlib::pin_out & csn); 
+
+    void transfer( uint8_t reg );
 	
     uint8_t read_register( uint8_t reg );
 	
@@ -58,7 +60,11 @@ public:
 
     void write( uint8_t value );
 
+    uint8_t read();
+
     void write_payload( uint8_t value );
+
+    uint8_t read_payload();
 
 };
 
