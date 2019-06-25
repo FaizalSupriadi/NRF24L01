@@ -22,6 +22,7 @@ int main( void ){
    nrf.setChannel( 100 );                   //sets frequency to 2500 MHz(2400 + 100)
    nrf.write_pipe( 1 );                     
    nrf.setOutputPower( 0 );                 //sets the output power to the lowest (-18 dBm) see NRF24.cpp and NRF24.hpp for more information about this
+   nrf.powerDown_rx();
    
    for(;;){
       nrf.write( 1 );                       //tries to send 1 (can only be 8 bits max for now)
