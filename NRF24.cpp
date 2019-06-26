@@ -56,18 +56,24 @@ void NRF24::set_ce( bool x ){
 }
 
 void NRF24::start(){
-   set_ce( 0 );
-   set_csn( 1 );
+   set_ce( 0 );                         //Sets it low, because we are not trying to transmit yet
+   set_csn( 1 );                        //Sets it high, because the SPI works with active low, and will react when csn is set high and than low
 
-   hwlib::wait_ms( 100 );
+   hwlib::wait_ms( 100 );               //Wait some time
 
-   setDataRate(1);
+   write_register( STATUS, 0x0C );
 
-   transfer( 0x50 );
-   transfer( 0x73 );
+   setDataRate(1);                      //Sets the data rate to 1Mbps
 
-   write_register( FEATURE, 0 );
-   write_register( DYNPD, 0 );
+   //transfer( 0x50 );
+   //transfer( 0x73 );
+
+   write_register( FEATURE, read_register( FEATURE ) | ( 1 << EN_DPL ) | ( 1 << EN_DYN_ACK ) ) ;        //Enables Dynamic Payload Length, and enables the W_TX_PAYLOAD_NOACK command
+   write_register( DYNPD, read_register( DYNPD ) | ( 1 << DPL_P0 ) | ( 1 << DPL_P1 ) | ( 1 << DPL_P2 ) | ( 1 << DPL_P3 ) | ( 1 << DPL_P4 ) | ( 1 << DPL_P5 ) );  //Enable dynamic payload length data pipes
+   write_register( EN_AA, read_register( EN_AA ) & ~( 1 << ENAA_P0 ) );                                 //Enable auto acknowledgement data pipe 0
+
+   //write_register( FEATURE, 0 );
+   //write_register( DYNPD, 0 );
 
    write_register( STATUS, ( 1 << RX_DR ) |( 1 << TX_DS ) | ( 1 << MAX_RT ) );
 
@@ -78,14 +84,14 @@ void NRF24::start(){
 
    powerup();
 
-   write_register( CONFIG, read_register( CONFIG ) & ~( 1 << PRIM_RX ) );
+   write_register( CONFIG, read_register( CONFIG ) & ~( ( 1 << PRIM_RX ) ) );           //  | ( 1 << EN_CRC )
 }
 
 void NRF24::write_pipe( uint8_t address ){
-   write_register( RX_ADDR_P0, address );
-   write_register( TX_ADDR, address );
+   write_register( RX_ADDR_P0, address );                       //needs to be the same as the TX_ADDR in case you use ACK
+   write_register( TX_ADDR, address );                          //on which address you are writing
 
-   write_register( RX_PW_P0, payload_size );
+   write_register( RX_PW_P0, payload_size );                    //only needed if you do not use dynamic payload
 }
 
 void NRF24::read_pipe( uint8_t address ){
@@ -106,17 +112,14 @@ void NRF24::powerUp_rx(){
    set_ce( 0 );
    powerup();
    write_register( CONFIG, read_register( CONFIG ) | ( 1 << PRIM_RX ) );
-   write_register( STATUS, ( 1 << RX_DR ) | ( 1 << TX_DS ) | ( 1 << MAX_RT ) );
+   //write_register( STATUS, ( 1 << RX_DR ) | ( 1 << TX_DS ) | ( 1 << MAX_RT ) );
    write_register( EN_RXADDR, ( read_register( EN_RXADDR ) & ~( 1 << ERX_P0 ) ) );
-   set_ce( 1 );
 }
 
 void NRF24::powerDown_rx(){
    set_ce( 0 );
-   powerdown();
-   write_register( CONFIG, read_register( CONFIG ) & ~( 1 << PRIM_RX ) );
-   write_register( EN_RXADDR, read_register( EN_RXADDR ) | ( 1 << ERX_P0 ) );    //testing purpose (does stand in other function, but I am not sure what they meant in the datasheets so I try it out)
    powerup();
+   write_register( CONFIG, read_register( CONFIG ) & ~( 1 << PRIM_RX ) );
 }
 
 void NRF24::powerup(){
@@ -129,11 +132,11 @@ void NRF24::powerdown(){
 }
 
 void NRF24::flush_rx(){
-   bus.transaction( hwlib::pin_out_dummy ).write( FLUSH_RX );
+   transfer( FLUSH_RX );
 }
 
 void NRF24::flush_tx(){
-   bus.transaction( hwlib::pin_out_dummy ).write( FLUSH_TX );
+   transfer( FLUSH_TX );
 }
 
 uint8_t NRF24::read_setup(){
@@ -199,13 +202,17 @@ hwlib::string<8> NRF24::getOutputPower(){
 void NRF24::write( uint8_t value ){
    write_payload( value );
    set_ce( 1 );
-   hwlib::wait_ns( 10000 );
+   hwlib::wait_ns( 20000 );
    set_ce( 0 );
    write_register( STATUS, ( 1 << RX_DR ) | ( 1 << TX_DS ) | ( 1 << MAX_RT ) );
 }
 
 uint8_t NRF24::read(){
+   set_ce( 1 );
+   hwlib::wait_ns(200000);
+   set_ce( 0 );
    uint8_t result = read_payload();
+
    write_register( STATUS, ( 1 << RX_DR ) | ( 1 << MAX_RT ) | ( 1 << TX_DS ) );
 
    return result;
@@ -213,7 +220,7 @@ uint8_t NRF24::read(){
 
 void NRF24::write_payload( uint8_t value ){
    set_csn( 0 );
-   bus.transaction( hwlib::pin_out_dummy ).write( W_TX_PAYLOAD_NOACK );
+   bus.transaction( hwlib::pin_out_dummy ).write( W_TX_PAYLOAD );
    bus.transaction( hwlib::pin_out_dummy ).write( value );
    set_csn( 1 );
 }
@@ -225,4 +232,8 @@ uint8_t NRF24::read_payload(){
    set_csn( 1 );
 
    return result;
+}
+
+uint8_t NRF24::check_fifo(){
+   return read_register( FIFO_STATUS );
 }
