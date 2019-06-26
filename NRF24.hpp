@@ -32,7 +32,7 @@ public:
 
     void start();
 
-    void write_pipe( uint8_t value );
+    void write_pipe( uint8_t address );
 
     void read_pipe( uint8_t address );
 
@@ -67,6 +67,8 @@ public:
     void write_payload( uint8_t value );
 
     uint8_t read_payload();
+
+    uint8_t check_fifo();
 
 };
 
