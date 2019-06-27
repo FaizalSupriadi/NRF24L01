@@ -70,6 +70,8 @@ public:
 
     uint8_t check_fifo();
 
+    void setRetries( uint8_t delay, uint8_t count );
+
 };
 
 #endif // NRF24_HPP
