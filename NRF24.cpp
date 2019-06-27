@@ -113,11 +113,11 @@ void NRF24::powerUp_tx(){
 }
 
 void NRF24::powerUp_rx(){
-   set_ce( 0 );
    powerup();
+   set_ce( 0 );
    write_register( CONFIG, read_register( CONFIG ) | ( 1 << PRIM_RX ) );
-   //write_register( STATUS, ( 1 << RX_DR ) | ( 1 << TX_DS ) | ( 1 << MAX_RT ) );
-   write_register( EN_RXADDR, ( read_register( EN_RXADDR ) & ~( 1 << ERX_P0 ) ) );
+   write_register( STATUS, ( 1 << RX_DR ) | ( 1 << TX_DS ) | ( 1 << MAX_RT ) );
+   set_ce( 1 );
 }
 
 void NRF24::powerDown_rx(){
@@ -214,9 +214,6 @@ void NRF24::write( uint8_t value ){
 }
 
 uint8_t NRF24::read(){
-   set_ce( 1 );
-   hwlib::wait_ns(2000000);
-   set_ce( 0 );
    uint8_t result = read_payload();
 
    write_register( STATUS, ( 1 << RX_DR ) | ( 1 << MAX_RT ) | ( 1 << TX_DS ) );
@@ -235,6 +232,7 @@ void NRF24::write_payload( uint8_t value ){
 uint8_t NRF24::read_payload(){
    set_csn( 0 );
    bus.transaction( hwlib::pin_out_dummy ).write( R_RX_PAYLOAD );
+   bus.transaction( hwlib::pin_out_dummy ).write( 0xFF );
    uint8_t result = bus.transaction( hwlib::pin_out_dummy ).read_byte();
    set_csn( 1 );
 
