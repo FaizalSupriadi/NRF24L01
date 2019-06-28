@@ -9,6 +9,7 @@ protected:
 	hwlib::pin_out & ce;
 	hwlib::pin_out & csn;
 	uint8_t payload_size;
+	uint8_t addr_width;
 
 public:
     
@@ -19,8 +20,12 @@ public:
     uint8_t read_byte();
 	
     uint8_t read_register( uint8_t reg );
+
+    void read_register( uint8_t reg, uint8_t* value uint8_t len);
 	
     void write_register( uint8_t reg, uint8_t value );
+
+    void write_register( uint8_t reg, uint8_t* value, uint8_t len );
 	
     void setChannel( uint8_t channel );
 	
@@ -71,6 +76,8 @@ public:
     uint8_t check_fifo();
 
     void setRetries( uint8_t delay, uint8_t count );
+
+    void setAddressWidth( uint8_t width );
 
 };
 
