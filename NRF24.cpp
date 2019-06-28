@@ -115,15 +115,6 @@ void NRF24::start(){
 
    setAddressWidth( 5 );                  //Sets the address width to 5 bytes
 
-   set_csn( 0 );
-   bus.transaction( hwlib::pin_out_dummy ).write( 0x50 );
-   bus.transaction( hwlib::pin_out_dummy ).write( 0x73 );
-   set_csn( 1 );
-
-   //write_register( FEATURE, read_register( FEATURE ) | ( 1 << EN_DPL ) | ( 1 << EN_DYN_ACK ) ) ;        //Enables Dynamic Payload Length, and enables the W_TX_PAYLOAD_NOACK command
-   //write_register( DYNPD, read_register( DYNPD ) | ( 1 << DPL_P0 ) | ( 1 << DPL_P1 ) | ( 1 << DPL_P2 ) | ( 1 << DPL_P3 ) | ( 1 << DPL_P4 ) | ( 1 << DPL_P5 ) );  //Enable dynamic payload length data pipes
-   //write_register( EN_AA, read_register( EN_AA ) & ~( 1 << ENAA_P0 ) );                                 //Enable auto acknowledgement data pipe 0
-
    write_register( FEATURE, 0 );
    write_register( DYNPD, 0 );
 
@@ -136,7 +127,7 @@ void NRF24::start(){
 
    powerup();
 
-   write_register( CONFIG, read_register( CONFIG ) & ~( 1 << PRIM_RX ) );           //  | ( 1 << EN_CRC )
+   write_register( CONFIG, read_register( CONFIG ) & ~( 1 << PRIM_RX ) );
 }
 
 /************************************************************************************************/
@@ -164,8 +155,6 @@ void NRF24::powerUp_rx(){
    write_register( CONFIG, read_register( CONFIG ) | ( 1 << PRIM_RX ) );
    write_register( STATUS, ( 1 << RX_DR ) | ( 1 << TX_DS ) | ( 1 << MAX_RT ) );
    set_ce( 1 );
-   write_register( RX_ADDR_P0, pipe0_reading_address, addr_width );
-  //write_register( EN_RXADDR, read_register( EN_RXADDR ) | ( 1 << ERX_P0 ) );
 }
 
 /************************************************************************************************/
@@ -276,43 +265,48 @@ hwlib::string<8> NRF24::getOutputPower(){
 
 /************************************************************************************************/
 
-void NRF24::write( uint8_t value ){
-   write_payload( value );
+void NRF24::write( uint8_t* value, uint8_t len ){
+   write_payload( value, len );
    hwlib::wait_ns(20000);
    set_ce( 0 );
    write_register( STATUS, ( 1 << RX_DR ) | ( 1 << TX_DS ) | ( 1 << MAX_RT ) );
 }
 
-uint8_t NRF24::read(){
-   uint8_t result = read_payload();
+/************************************************************************************************/
+
+void NRF24::read( uint8_t* value, uint8_t len ){
+   read_payload( value, len );
 
    write_register( STATUS, ( 1 << RX_DR ) | ( 1 << MAX_RT ) | ( 1 << TX_DS ) );
 
-   return result;
 }
 
 /************************************************************************************************/
 
-void NRF24::write_payload( uint8_t value ){
+void NRF24::write_payload( uint8_t* value, uint8_t len ){
    set_csn( 0 );
    bus.transaction( hwlib::pin_out_dummy ).write( W_TX_PAYLOAD );
-   bus.transaction( hwlib::pin_out_dummy ).write( value );
+
+   while( len-- ){
+      bus.transaction( hwlib::pin_out_dummy ).write( *value++ );
+   }
+   
    set_csn( 1 );
    set_ce( 1 );
 }
 
 /************************************************************************************************/
 
-uint8_t NRF24::read_payload(){
+void NRF24::read_payload( uint8_t* value, uint8_t len ){
    set_csn( 0 );
    bus.transaction( hwlib::pin_out_dummy ).write( R_RX_PAYLOAD );
-   bus.transaction( hwlib::pin_out_dummy ).write( 0xFF );
-   uint8_t result = bus.transaction( hwlib::pin_out_dummy ).read_byte();
-   //bus.transaction( hwlib::pin_out_dummy ).write( 0xFF );
-   //result = bus.transaction( hwlib::pin_out_dummy ).read_byte();
-   set_csn( 1 );
 
-   return result;
+   while( len-- ){
+      bus.transaction( hwlib::pin_out_dummy ).write( 0xFF );
+      *value++ = bus.transaction( hwlib::pin_out_dummy ).read_byte();
+   }
+
+   set_csn( 1 );
 }
 
 /************************************************************************************************/
