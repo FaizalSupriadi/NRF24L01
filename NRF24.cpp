@@ -151,20 +151,9 @@ void NRF24::write_pipe( uint8_t *address ){
 /************************************************************************************************/
 
 void NRF24::read_pipe( uint8_t *address ){
-   write_register( RX_ADDR_P0, address );
-   write_register( TX_ADDR, address ); 
+   write_register( RX_ADDR_P0, address, addr_width ); 
    write_register( RX_PW_P0, payload_size );
    write_register( EN_RXADDR, read_register( EN_RXADDR ) | ( 1 << ERX_P0 ) );
-}
-
-/************************************************************************************************/
-
-void NRF24::powerUp_tx(){
-   set_ce( 0 );
-   powerup();
-   write_register( CONFIG, read_register( CONFIG ) & ~( 1 << PRIM_RX ) );
-   set_ce( 1 );
-   write_register( STATUS, ( 1 << RX_DR ) |( 1 << TX_DS ) | ( 1 << MAX_RT ) );
 }
 
 /************************************************************************************************/
