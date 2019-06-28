@@ -37,9 +37,9 @@ public:
 
     void start();
 
-    void write_pipe( uint8_t address );
+    void write_pipe( uint8_t *address );
 
-    void read_pipe( uint8_t address );
+    void read_pipe( uint8_t *address );
 
     void powerUp_rx();
 
@@ -63,13 +63,13 @@ public:
 
     hwlib::string<8> getOutputPower();
 
-    void write( uint8_t value );
+    void write( uint8_t* value, uint8_t len );
 
-    uint8_t read();
+    void read( uint8_t* value, uint8_t len );
 
-    void write_payload( uint8_t value );
+    void write_payload( uint8_t value, uint8_t len );
 
-    uint8_t read_payload();
+    void read_payload( uint8_t* value, uint8_t len );
 
     uint8_t check_fifo();
 
