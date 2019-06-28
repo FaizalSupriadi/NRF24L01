@@ -41,8 +41,6 @@ public:
 
     void read_pipe( uint8_t address );
 
-    void powerUp_tx();
-
     void powerUp_rx();
 
     void powerDown_rx();
