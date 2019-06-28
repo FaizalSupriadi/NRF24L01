@@ -2,15 +2,21 @@
 #include "NRF24_register.hpp"
 #include "hwlib.hpp"
 
+/************************************************************************************************/
+
 NRF24::NRF24( hwlib::spi_bus & bus, hwlib::pin_out & ce, hwlib::pin_out & csn ):
-   bus( bus ), ce( ce ), csn( csn ), payload_size( 5 )
+   bus( bus ), ce( ce ), csn( csn ), payload_size( 5 ), addr_width( 5 );
 {} 
+
+/************************************************************************************************/
 
 void NRF24::transfer( uint8_t reg ){
    set_csn( 0 );
    bus.transaction( hwlib::pin_out_dummy ).write( reg );
    set_csn( 1 );
 }
+
+/************************************************************************************************/
 
 uint8_t NRF24::read_byte(){
    set_csn( 0 );
@@ -19,41 +25,81 @@ uint8_t NRF24::read_byte(){
 
    return value;
 }
+
+/************************************************************************************************/
 	
 uint8_t NRF24::read_register( uint8_t reg ){
-   set_csn(0);
+   set_csn( 0 );
    bus.transaction( hwlib::pin_out_dummy ).write( R_REGISTER | ( 0x1F & reg ) );
    uint8_t result = bus.transaction( hwlib::pin_out_dummy ).read_byte();
-   set_csn(1);
+   set_csn( 1 );
 
    return result;
 }
+
+/************************************************************************************************/
+
+void NRF24::read_register( uint8_t reg, uint8_t* value uint8_t len){
+   set_csn( 0 );
+   bus.transaction( hwlib::pin_out_dummy ).write( ( R_REGISTER | ( 0x1F & reg ) ) );
+   
+   while( len-- ){
+      *value++ = bus.transaction( hwlib::pin_out_dummy ).read_byte();
+   }
+
+   set_csn( 1 );
+}
+
+/************************************************************************************************/
 	
 void NRF24::write_register( uint8_t reg, uint8_t value ){
    set_csn( 0 );
-   bus.transaction( hwlib::pin_out_dummy ).write( (W_REGISTER | ( 0x1F & reg )) );
+   bus.transaction( hwlib::pin_out_dummy ).write( ( W_REGISTER | ( 0x1F & reg ) ) );
    bus.transaction( hwlib::pin_out_dummy ).write(value);
    set_csn( 1 );
 }
+
+/************************************************************************************************/
+
+void NRF24::write_register( uint8_t reg, uint8_t* value, uint8_t len ){
+   set_csn( 0 );
+   bus.transaction( hwlib::pin_out_dummy ).write( ( W_REGISTER | ( 0x1F & reg ) ) );
+
+   while( len-- ){
+      bus.transaction( hwlib::pin_out_dummy ).write( *value++ );
+   }
+
+   set_csn( 1 );
+}
+
+/************************************************************************************************/
 	
 void NRF24::setChannel( uint8_t channel ){
    channel = ( channel < 125 ) ? channel : 125;
    write_register( RF_CH, channel );
 }
 
+/************************************************************************************************/
+
 uint8_t NRF24::getChannel(){
    return read_register( RF_CH );
 }
+
+/************************************************************************************************/
 
 void NRF24::set_csn( bool x ){
    csn.write( x );
    csn.flush();
 }
 
+/************************************************************************************************/
+
 void NRF24::set_ce( bool x ){
    ce.write( x );
    ce.flush();
 }
+
+/************************************************************************************************/
 
 void NRF24::start(){
    set_ce( 0 );                         //Sets it low, because we are not trying to transmit yet
@@ -63,9 +109,11 @@ void NRF24::start(){
 
    write_register( STATUS, 0x0C );
 
-   setRetries(5, 15);
+   setRetries( 5, 15 );
 
-   setDataRate(1);                      //Sets the data rate to 1Mbps
+   setDataRate( 1 );                      //Sets the data rate to 1Mbps
+
+   setAddressWidth( 5 );                  //Sets the address width to 5 bytes
 
    set_csn( 0 );
    bus.transaction( hwlib::pin_out_dummy ).write( 0x50 );
@@ -91,18 +139,25 @@ void NRF24::start(){
    write_register( CONFIG, read_register( CONFIG ) & ~( 1 << PRIM_RX ) );           //  | ( 1 << EN_CRC )
 }
 
-void NRF24::write_pipe( uint8_t address ){
-   write_register( RX_ADDR_P0, address );                       //needs to be the same as the TX_ADDR in case you use ACK
-   write_register( TX_ADDR, address );                          //on which address you are writing
+/************************************************************************************************/
+
+void NRF24::write_pipe( uint8_t *address ){
+   write_register( RX_ADDR_P0, address, addr_width );            //needs to be the same as the TX_ADDR in case you use ACK
+   write_register( TX_ADDR, address, addr_width );               //on which address you are writing
 
    write_register( RX_PW_P0, payload_size );                    //only needed if you do not use dynamic payload
 }
 
-void NRF24::read_pipe( uint8_t address ){
+/************************************************************************************************/
+
+void NRF24::read_pipe( uint8_t *address ){
    write_register( RX_ADDR_P0, address );
+   write_register( TX_ADDR, address ); 
    write_register( RX_PW_P0, payload_size );
    write_register( EN_RXADDR, read_register( EN_RXADDR ) | ( 1 << ERX_P0 ) );
 }
+
+/************************************************************************************************/
 
 void NRF24::powerUp_tx(){
    set_ce( 0 );
@@ -112,13 +167,19 @@ void NRF24::powerUp_tx(){
    write_register( STATUS, ( 1 << RX_DR ) |( 1 << TX_DS ) | ( 1 << MAX_RT ) );
 }
 
+/************************************************************************************************/
+
 void NRF24::powerUp_rx(){
    powerup();
    set_ce( 0 );
    write_register( CONFIG, read_register( CONFIG ) | ( 1 << PRIM_RX ) );
    write_register( STATUS, ( 1 << RX_DR ) | ( 1 << TX_DS ) | ( 1 << MAX_RT ) );
    set_ce( 1 );
+   write_register( RX_ADDR_P0, pipe0_reading_address, addr_width );
+  //write_register( EN_RXADDR, read_register( EN_RXADDR ) | ( 1 << ERX_P0 ) );
 }
+
+/************************************************************************************************/
 
 void NRF24::powerDown_rx(){
    set_ce( 0 );
@@ -126,29 +187,41 @@ void NRF24::powerDown_rx(){
    flush_tx();
    write_register( CONFIG, read_register( CONFIG ) & ~( 1 << PRIM_RX ) );
    powerup();
-   write_register( EN_RXADDR, read_register( EN_RXADDR ) | ( 1 << ERX_P0 ) );
+   write_register( EN_RXADDR, read_register( EN_RXADDR ) & ~( 1 << ERX_P0 ) );
 }
+
+/************************************************************************************************/
 
 void NRF24::powerup(){
    write_register( CONFIG, read_register( CONFIG ) | ( 1 << PWR_UP ) );
 }
+
+/************************************************************************************************/
 
 void NRF24::powerdown(){
    set_ce( 0 );
    write_register( CONFIG, read_register( CONFIG ) & ~( 1 << PWR_UP ) );
 }
 
+/************************************************************************************************/
+
 void NRF24::flush_rx(){
    transfer( FLUSH_RX );
 }
+
+/************************************************************************************************/
 
 void NRF24::flush_tx(){
    transfer( FLUSH_TX );
 }
 
+/************************************************************************************************/
+
 uint8_t NRF24::read_setup(){
    return read_register( RF_SETUP );
 }
+
+/************************************************************************************************/
 
 void NRF24::setDataRate( uint8_t speed ){
    if(speed == 0){
@@ -161,6 +234,8 @@ void NRF24::setDataRate( uint8_t speed ){
       write_register( RF_SETUP, ( read_register(RF_SETUP) | ( 1 << RF_DR_LOW  ) ) & ~( 1 << RF_DR_HIGH ) );
    }
 }
+
+/************************************************************************************************/
 
 hwlib::string<8> NRF24::getDataRate(){
    uint8_t value = ( read_register(RF_SETUP) & 0x28 );
@@ -176,6 +251,8 @@ hwlib::string<8> NRF24::getDataRate(){
    }
 }
 
+/************************************************************************************************/
+
 void NRF24::setOutputPower( uint8_t value ){
    if( value == 0 ){
       write_register( RF_SETUP, read_register( RF_SETUP ) & ~( 1 <<  RF_PWR_HIGH | 1 << RF_PWR_LOW ) );
@@ -189,6 +266,8 @@ void NRF24::setOutputPower( uint8_t value ){
       write_register( RF_SETUP, read_register( RF_SETUP ) & ~( 1 <<  RF_PWR_HIGH | 1 << RF_PWR_LOW ) );
    }
 }
+
+/************************************************************************************************/
 
 hwlib::string<8> NRF24::getOutputPower(){
    uint8_t value = read_register( RF_SETUP ) & 0x06;
@@ -206,6 +285,8 @@ hwlib::string<8> NRF24::getOutputPower(){
    }
 }
 
+/************************************************************************************************/
+
 void NRF24::write( uint8_t value ){
    write_payload( value );
    hwlib::wait_ns(20000);
@@ -221,6 +302,8 @@ uint8_t NRF24::read(){
    return result;
 }
 
+/************************************************************************************************/
+
 void NRF24::write_payload( uint8_t value ){
    set_csn( 0 );
    bus.transaction( hwlib::pin_out_dummy ).write( W_TX_PAYLOAD );
@@ -229,20 +312,44 @@ void NRF24::write_payload( uint8_t value ){
    set_ce( 1 );
 }
 
+/************************************************************************************************/
+
 uint8_t NRF24::read_payload(){
    set_csn( 0 );
    bus.transaction( hwlib::pin_out_dummy ).write( R_RX_PAYLOAD );
    bus.transaction( hwlib::pin_out_dummy ).write( 0xFF );
    uint8_t result = bus.transaction( hwlib::pin_out_dummy ).read_byte();
+   //bus.transaction( hwlib::pin_out_dummy ).write( 0xFF );
+   //result = bus.transaction( hwlib::pin_out_dummy ).read_byte();
    set_csn( 1 );
 
    return result;
 }
 
+/************************************************************************************************/
+
 uint8_t NRF24::check_fifo(){
    return read_register( FIFO_STATUS );
 }
 
+/************************************************************************************************/
+
 void NRF24::setRetries( uint8_t delay, uint8_t count ){
    write_register( SETUP_RETR, (delay & 0xF) << ARD | (count & 0xF) << ARC );
+}
+
+/************************************************************************************************/
+
+void NRF24::setAddressWidth( uint8_t width ){
+
+   //The -2 I use in writing to the register is because the bits are different from the width
+   //if the width is 5 the bits are 11, and it can't be lower than 3.
+   if( width > 2 && width < 6 ){
+      write_register( SETUP_AW, ( width - 2 ) );
+      addr_width = width;
+   }else{
+      addr_width = 5;
+      write_register( SETUP_AW, ( addr_width - 2 ) );
+   }
+
 }
