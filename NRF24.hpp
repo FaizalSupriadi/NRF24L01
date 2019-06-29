@@ -75,7 +75,11 @@ public:
 
     void setRetries( uint8_t delay, uint8_t count );
 
+    void getRetries();
+
     void setAddressWidth( uint8_t width );
+
+    uint8_t getAddressWidth();
 
     void readAllRegisters( void );
 
