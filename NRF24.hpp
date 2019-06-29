@@ -77,6 +77,8 @@ public:
 
     void setAddressWidth( uint8_t width );
 
+    void readAllRegisters( void );
+
 };
 
 #endif // NRF24_HPP
