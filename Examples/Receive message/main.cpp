@@ -17,14 +17,25 @@ int main( void ){
    auto spi_bus = hwlib::spi_bus_bit_banged_sclk_mosi_miso( 
       sclk, mosi, miso );
 
+   uint8_t address[5] = { 0x00, 0x00, 0x00, 0x00, 0x01 };
+
    auto nrf = NRF24( spi_bus, ce, csn );
    nrf.start();                   
-   nrf.read_pipe( 0x01 );                     
-   nrf.setOutputPower( 0 );                 
+   nrf.read_pipe( address );
    nrf.powerUp_rx();
+
+   uint8_t value[5];
+   uint8_t len = 5;
    
    for(;;){
-      uint8_t value = nrf.read();
-      hwlib::cout << "value: " << value << "\n" << hwlib::flush;
+      nrf.read( &value, len );
+      
+      hwlib::cout << "values: " << hwlib::flush;
+
+      for(int i = 0; i < len; i++){
+         hwlib::cout << value[i] << " " << hwlib::flush;
+      }
+
+      hwlib::cout << "\n" << hwlib::flush;
    }
 }
