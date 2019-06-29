@@ -121,6 +121,8 @@ void NRF24::start(){
 
    setAddressWidth( 5 );                  //Sets the address width to 5 bytes
 
+   setOutputPower( 0 );                   //Sets the output power to minimum
+
    write_register( FEATURE, 0 );          //Sets the FEATURE register off
    write_register( DYNPD, 0 );            //Sets the dynamic payload off
 
@@ -345,6 +347,21 @@ void NRF24::setRetries( uint8_t delay, uint8_t count ){
 
 /************************************************************************************************/
 
+void NRF24::getRetries(){
+
+   uint8_t setup = read_register( SETUP_RETR );          //reads whats in the SETUP_RETR register
+   uint8_t delay = ( ( setup & 0xF0 ) >> 4 );            //only allows the values of the last 4 bits to exist and places them on the place of the 1st 4 bits
+   uint8_t retransmit = setup & 0x0F;                    //only allows the values of the first 4 bits to exist
+   
+   //Every posible value you can make with the delay (which is 16) adds 250 microseconds so 0 is 250 microseconds and 1111 is 4000 microseconds
+   //Retransmits does not have to change because it is the same value
+   hwlib::cout << "Delay:       " << 250 * ( delay + 1 ) << "microseconds\n" << hwlib::flush;
+   hwlib::cout << "Retransmits: " <<  retransmit << "\n" << hwlib::flush;
+   
+}
+
+/************************************************************************************************/
+
 void NRF24::setAddressWidth( uint8_t width ){
 
    //The -2 I use in writing to the register is because the bits are different from the width
@@ -360,24 +377,37 @@ void NRF24::setAddressWidth( uint8_t width ){
 
 /************************************************************************************************/
 
+uint8_t NRF24::getAddressWidth(){
+
+   uint8_t aw = read_register( SETUP_AW );         //reads the register where the address width is saved
+
+   //checks if aw is not equal 0 or higher than 3, because those values are illegal
+   if(aw != 0 && aw < 4 ){
+      return aw + 2            //returns aw + 2 because, the bit version is different from the real value
+   }
+}
+
+/************************************************************************************************/
+
 void NRF24::readAllRegisters( void ){
 
    //first it will display all the registers (expect the ones that have a address)
-   hwlib::cout << "CONFIG: "       << hwlib::bin << read_register( CONFIG )       << "\n" << hwlib::flush;
-   hwlib::cout << "EN_AA: "        << hwlib::bin << read_register( EN_AA )        << "\n" << hwlib::flush;
-   hwlib::cout << "EN_RXADDR: "    << hwlib::bin << read_register( EN_RXADDR )    << "\n" << hwlib::flush;
-   hwlib::cout << "SETUP_AW: "     << hwlib::bin << read_register( SETUP_AW )     << "\n" << hwlib::flush;
-   hwlib::cout << "SETUP_RETR: "   << hwlib::bin << read_register( SETUP_RETR )   << "\n" << hwlib::flush;
-   hwlib::cout << "RF_CH: "        << hwlib::dec << read_register( RF_CH )        << "\n" << hwlib::flush;
-   hwlib::cout << "RF_SETUP: "     << hwlib::bin << read_register( RF_SETUP )     << "\n" << hwlib::flush;
-   hwlib::cout << "STATUS: "       << hwlib::bin << read_register( STATUS )       << "\n" << hwlib::flush;
-   hwlib::cout << "OBSERVE_TX: "   << hwlib::bin << read_register( OBSERVE_TX )   << "\n" << hwlib::flush;
-   hwlib::cout << "RPD: "          << hwlib::bin << read_register( RPD )          << "\n" << hwlib::flush;
-   hwlib::cout << "FIFO_STATUS: "  << hwlib::bin << read_register( FIFO_STATUS )  << "\n" << hwlib::flush;
-   hwlib::cout << "DYNPD: "        << hwlib::bin << read_register( DYNPD )        << "\n" << hwlib::flush;
-   hwlib::cout << "FEATURE: "      << hwlib::bin << read_register( FEATURE )      << "\n" << hwlib::flush;
+   hwlib::cout << "CONFIG:        " << hwlib::bin << read_register( CONFIG )       << "\n" << hwlib::flush;
+   hwlib::cout << "EN_AA:         " << hwlib::bin << read_register( EN_AA )        << "\n" << hwlib::flush;
+   hwlib::cout << "EN_RXADDR:     " << hwlib::bin << read_register( EN_RXADDR )    << "\n" << hwlib::flush;
+   hwlib::cout << "SETUP_RETR:    " << hwlib::bin << read_register( SETUP_RETR )   << "\n" << hwlib::flush;
+   hwlib::cout << "RF_CH:         " << hwlib::dec << read_register( RF_CH )        << "\n" << hwlib::flush;
+   hwlib::cout << "RF_SETUP:      " << hwlib::bin << read_register( RF_SETUP )     << "\n" << hwlib::flush;
+   hwlib::cout << "STATUS:        " << hwlib::bin << read_register( STATUS )       << "\n" << hwlib::flush;
+   hwlib::cout << "OBSERVE_TX:    " << hwlib::bin << read_register( OBSERVE_TX )   << "\n" << hwlib::flush;
+   hwlib::cout << "RPD:           " << hwlib::bin << read_register( RPD )          << "\n" << hwlib::flush;
+   hwlib::cout << "FIFO_STATUS:   " << hwlib::bin << read_register( FIFO_STATUS )  << "\n" << hwlib::flush;
+   hwlib::cout << "DYNPD:         " << hwlib::bin << read_register( DYNPD )        << "\n" << hwlib::flush;
+   hwlib::cout << "FEATURE:       " << hwlib::bin << read_register( FEATURE )      << "\n\n" << hwlib::flush;
 
    //displays some important specific values out of some registers using other functions
-   hwlib::cout << "Output power: " << getOutputPower() << "\n" << hwlib::flush;
-   hwlib::cout << "Data rate: " << getDataRate() << "\n" << hwlib::flush;
+   hwlib::cout << "Output power:  " << getOutputPower() << "\n"   << hwlib::flush;
+   hwlib::cout << "Data rate:     " << getDataRate() << "\n"      << hwlib::flush;
+   hwlib::cout << "Address width: " << getAddressWidth(); << "\n" << hwlib::flush;
+   getRetries();
 }
