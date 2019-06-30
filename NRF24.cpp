@@ -303,7 +303,7 @@ void NRF24::write( uint8_t* value, uint8_t len ){
 
 void NRF24::writeLong( uint8_t* value, uint8_t len ){
 
-   uint8_t[payload_size] tmp = {};                                 //sends a tmp uint8_t array of the length of the payload 
+   uint8_t tmp[payload_size] = {};                                 //sends a tmp uint8_t array of the length of the payload 
    uint8_t count = 0;                                              //counts where in the array we are working
 
    while( len > 0 ){                                               //as long as the byte length is higher than 0 it will stay writing
@@ -313,7 +313,7 @@ void NRF24::writeLong( uint8_t* value, uint8_t len ){
             tmp[i] = value[i + (payload_size * count)];            //writes payload_size bytes into a temporarly uint8_t array
          }
       }else{
-         for (int i = 0; i < len, i++){  
+         for (int i = 0; i < len; i++){  
             tmp[i] = value[i + (payload_size * count)];            //writes the last bytes that are less than the payload_size byets into the tmp array
          }
       }
