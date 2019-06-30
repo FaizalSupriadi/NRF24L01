@@ -28,14 +28,20 @@ int main( void ){
    uint8_t len = 5;
    
    for(;;){
-      nrf.read( value, len );
       
-      hwlib::cout << "values: " << hwlib::flush;
+      if( nrf.checkRXfifo() ){
+         nrf.read( value, len );
 
-      for(int i = 0; i < len; i++){
-         hwlib::cout << value[i] << " " << hwlib::flush;
+         hwlib::cout << "values: " << hwlib::flush;
+
+         for(int i = 0; i < len; i++){
+            hwlib::cout << value[i] << " " << hwlib::flush;
+         }
+
+         hwlib::cout << "\n" << hwlib::flush;
+
+         nrf.flush_rx();
+         
       }
-
-      hwlib::cout << "\n" << hwlib::flush;
    }
 }
