@@ -24,11 +24,11 @@ int main( void ){
    nrf.read_pipe( address );
    nrf.powerUp_rx();
 
-   uint8_t value[5];
+   uint8_t value[5] = {};
    uint8_t len = 5;
    
    for(;;){
-      nrf.read( &value, len );
+      nrf.read( value, len );
       
       hwlib::cout << "values: " << hwlib::flush;
 
