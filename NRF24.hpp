@@ -67,6 +67,8 @@ public:
 
     void write( uint8_t* value, uint8_t len );
 
+    void writeLong( uint8_t* value, uint8_t len );
+
     void read( uint8_t* value, uint8_t len );
 
     void write_payload( uint8_t* value, uint8_t len );
