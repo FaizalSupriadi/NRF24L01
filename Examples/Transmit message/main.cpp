@@ -24,8 +24,8 @@ int main( void ){
    nrf.write_pipe( address );
    nrf.powerDown_rx();
 
-   uint8_t value[1] = { 5 };
-   uint8_t len = 1;
+   uint8_t value[5] = { 1, 2, 3, 4, 5 };
+   uint8_t len = 5;
    
    for(;;){
       nrf.write( value, len );
