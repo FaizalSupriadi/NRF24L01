@@ -15,6 +15,8 @@ public:
     
     NRF24( hwlib::spi_bus & bus, hwlib::pin_out & ce, hwlib::pin_out & csn); 
 
+    NRF24( hwlib::spi_bus & bus, hwlib::pin_out & ce, hwlib::pin_out & csn, uint8_t payload_size, uint8_t addr_width );
+
     void transfer( uint8_t reg );
 
     uint8_t read_byte();
@@ -82,6 +84,8 @@ public:
     uint8_t getAddressWidth();
 
     void readAllRegisters( void );
+
+    bool checkRXfifo();
 
 };
 
