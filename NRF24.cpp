@@ -10,6 +10,12 @@ NRF24::NRF24( hwlib::spi_bus & bus, hwlib::pin_out & ce, hwlib::pin_out & csn ):
 
 /************************************************************************************************/
 
+NRF24::NRF24( hwlib::spi_bus & bus, hwlib::pin_out & ce, hwlib::pin_out & csn, uint8_t payload_size, uint8_t addr_width ):
+   bus( bus ), ce( ce ), csn( csn ), payload_size( payload_size ), addr_width( addr_width )
+{}
+
+/************************************************************************************************/
+
 void NRF24::transfer( uint8_t reg ){
 
    set_csn( 0 );                                               //begin the transaction
@@ -301,6 +307,8 @@ void NRF24::read( uint8_t* value, uint8_t len ){
 
    write_register( STATUS, ( 1 << RX_DR ) | ( 1 << MAX_RT ) | ( 1 << TX_DS ) );
 
+   flush_tx();
+
 }
 
 /************************************************************************************************/
@@ -326,7 +334,6 @@ void NRF24::read_payload( uint8_t* value, uint8_t len ){
    bus.transaction( hwlib::pin_out_dummy ).write( R_RX_PAYLOAD );                 //starts the reading of the FIFO
 
    while( len-- ){
-      bus.transaction( hwlib::pin_out_dummy ).write( 0xFF );
       *value++ = bus.transaction( hwlib::pin_out_dummy ).read_byte();             //add the bytes to value
    }
 
@@ -355,8 +362,8 @@ void NRF24::getRetries(){
    
    //Every posible value you can make with the delay (which is 16) adds 250 microseconds so 0 is 250 microseconds and 1111 is 4000 microseconds
    //Retransmits does not have to change because it is the same value
-   hwlib::cout << "Delay:       " << 250 * ( delay + 1 ) << "microseconds\n" << hwlib::flush;
-   hwlib::cout << "Retransmits: " <<  retransmit << "\n" << hwlib::flush;
+   hwlib::cout << "Delay:         " << hwlib::dec << 250 * ( delay + 1 ) << " microseconds\n" << hwlib::flush;
+   hwlib::cout << "Retransmits:   " << retransmit << "\n" << hwlib::flush;
    
 }
 
@@ -393,6 +400,8 @@ uint8_t NRF24::getAddressWidth(){
 
 void NRF24::readAllRegisters( void ){
 
+   hwlib::wait_ms( 100 );               //waits some time, because otherwise a part will not be shown
+
    //first it will display all the registers (expect the ones that have a address)
    hwlib::cout << "CONFIG:        " << hwlib::bin << read_register( CONFIG )       << "\n" << hwlib::flush;
    hwlib::cout << "EN_AA:         " << hwlib::bin << read_register( EN_AA )        << "\n" << hwlib::flush;
@@ -412,4 +421,13 @@ void NRF24::readAllRegisters( void ){
    hwlib::cout << "Data rate:     " << getDataRate() << "\n"      << hwlib::flush;
    hwlib::cout << "Address width: " << getAddressWidth() << "\n" << hwlib::flush;
    getRetries();
+}
+
+bool NRF24::checkRXfifo(){
+
+   if ( ( read_register( FIFO_STATUS ) & ( 1 << RX_EMPTY ) ) == 0 ){
+      return 1;                                                               //returns 1 if there is something in the RX fifo
+   }else{
+      return 0;                                                               //returns 0 if RX fifo is empty
+   }
 }
