@@ -5,7 +5,7 @@
 /************************************************************************************************/
 
 NRF24::NRF24( hwlib::spi_bus & bus, hwlib::pin_out & ce, hwlib::pin_out & csn ):
-   bus( bus ), ce( ce ), csn( csn ), payload_size( 5 ), addr_width( 5 );
+   bus( bus ), ce( ce ), csn( csn ), payload_size( 5 ), addr_width( 5 )
 {} 
 
 /************************************************************************************************/
@@ -42,7 +42,7 @@ uint8_t NRF24::read_register( uint8_t reg ){
 
 /************************************************************************************************/
 
-void NRF24::read_register( uint8_t reg, uint8_t* value uint8_t len){
+void NRF24::read_register( uint8_t reg, uint8_t* value, uint8_t len){
 
    set_csn( 0 );                                                                      //starts the transaction
    bus.transaction( hwlib::pin_out_dummy ).write( ( R_REGISTER | ( 0x1F & reg ) ) );  //uses the read command to read the value
@@ -383,7 +383,9 @@ uint8_t NRF24::getAddressWidth(){
 
    //checks if aw is not equal 0 or higher than 3, because those values are illegal
    if(aw != 0 && aw < 4 ){
-      return aw + 2            //returns aw + 2 because, the bit version is different from the real value
+      return aw + 2;            //returns aw + 2 because, the bit version is different from the real value
+   }else{
+      return 0;                 //zero indicates that the value that have been read is not legal
    }
 }
 
@@ -408,6 +410,6 @@ void NRF24::readAllRegisters( void ){
    //displays some important specific values out of some registers using other functions
    hwlib::cout << "Output power:  " << getOutputPower() << "\n"   << hwlib::flush;
    hwlib::cout << "Data rate:     " << getDataRate() << "\n"      << hwlib::flush;
-   hwlib::cout << "Address width: " << getAddressWidth(); << "\n" << hwlib::flush;
+   hwlib::cout << "Address width: " << getAddressWidth() << "\n" << hwlib::flush;
    getRetries();
 }
