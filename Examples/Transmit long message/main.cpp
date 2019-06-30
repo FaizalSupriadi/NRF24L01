@@ -28,6 +28,8 @@ int main( void ){
    uint8_t len = 18;
    
    for(;;){
+      hwlib::wait_ms( 200 );
+      
       nrf.writeLong( value, len );
    }
 }
