@@ -21,7 +21,7 @@ public:
 	
     uint8_t read_register( uint8_t reg );
 
-    void read_register( uint8_t reg, uint8_t* value uint8_t len);
+    void read_register( uint8_t reg, uint8_t* value, uint8_t len);
 	
     void write_register( uint8_t reg, uint8_t value );
 
@@ -67,7 +67,7 @@ public:
 
     void read( uint8_t* value, uint8_t len );
 
-    void write_payload( uint8_t value, uint8_t len );
+    void write_payload( uint8_t* value, uint8_t len );
 
     void read_payload( uint8_t* value, uint8_t len );
 
