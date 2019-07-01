@@ -305,23 +305,31 @@ void NRF24::writeLong( uint8_t* value, uint8_t len ){
 
    uint8_t tmp[payload_size] = {};                                 //sends a tmp uint8_t array of the length of the payload 
    uint8_t count = 0;                                              //counts where in the array we are working
+   uint8_t len1 = len;                                             //temporarly save for len (should be deleted if I find a better way)
 
    while( len > 0 ){                                               //as long as the byte length is higher than 0 it will stay writing
       
-      if( len >= payload_size ){                                   //checks if the length is still higher than payload_size
-         for(int i = 0; i < payload_size; i++){
-            tmp[i] = value[i + (payload_size * count)];            //writes payload_size bytes into a temporarly uint8_t array
-         }
-      }else{
-         for (int i = 0; i < len; i++){  
-            tmp[i] = value[i + (payload_size * count)];            //writes the last bytes that are less than the payload_size byets into the tmp array
+      for(int i = 0; i < payload_size; i++){
+
+         if( i < len ){
+            tmp[i] = value[i + (payload_size * count)]; 
+         }else{
+            tmp[i] = 0;
          }
       }
 
-      write( tmp, len >= payload_size ? payload_size : len );      //writes the bytes and the payload_size and if there are less bytes to write it will write less bytes
+      //flush_tx();
+
+      write( tmp, payload_size );                                  //writes the bytes and the payload_size and if there are less bytes to write it will write less bytes
 
       len -= payload_size;                                         //makes the length shorter
       count++;                                                     //adds one to the counter
+
+      if(len > len1){
+         break;
+      }
+
+      hwlib::wait_ms( 100 );
    }
 }
 
