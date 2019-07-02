@@ -27,16 +27,16 @@ int main( void ){
       shcp, ds, hwlib::pin_in_dummy );
    auto leds = hwlib::hc595( spi_bus1, stcp );
 
-   leds.write( 0 );
+   leds.write( 0 );       //sets all the leds to 0
    leds.flush();
 
 
    uint8_t address[5] = { 0x00, 0x00, 0x00, 0x00, 0x01 };     //The 5 byte long address we are going to use    
   
    auto nrf = NRF24( spi_bus, ce, csn );
-   nrf.start();                                               //sets the default values in the register                    
-   nrf.setPayloadSize( 8 );                                   //makes the payload 8 bytes long (must be done before write_pipe)
-   nrf.read_pipe( address );                                 //writes the address to the register and sets the payload of the FIFO
+   nrf.start();                                             //sets the default values in the register                    
+   nrf.setPayloadSize( 8 );                                 //makes the payload 8 bytes long (must be done before write_pipe)
+   nrf.read_pipe( address );                                //writes the address to the register and sets the payload of the FIFO
    nrf.powerUp_rx();                                        //starts the TX mode
 
    uint8_t value[8] = {};                //The value we are going to send
