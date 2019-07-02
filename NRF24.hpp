@@ -3,6 +3,13 @@
 
 #include "hwlib.hpp"
 
+// this file contains Doxygen lines
+/// @file
+
+/// \brief
+/// object of nrf24l01+
+/// \details
+/// This object can be used to transmit and receive data over the nrf24l01+ chip
 class NRF24 {
 protected:
 	hwlib::spi_bus & bus; 
