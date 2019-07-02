@@ -127,7 +127,7 @@ void NRF24::start(){
 
    setAddressWidth( 5 );                  //Sets the address width to 5 bytes
 
-   setOutputPower( 0 );                   //Sets the output power to minimum
+   setOutputPower( 3 );                   //Sets the output power to minimum
 
    write_register( FEATURE, 0 );          //Sets the FEATURE register off
    write_register( DYNPD, 0 );            //Sets the dynamic payload off
@@ -463,6 +463,8 @@ void NRF24::readAllRegisters( void ){
    getRetries();
 }
 
+/************************************************************************************************/
+
 bool NRF24::checkRXfifo(){
 
    if ( ( read_register( FIFO_STATUS ) & ( 1 << RX_EMPTY ) ) == 0 ){
@@ -470,4 +472,16 @@ bool NRF24::checkRXfifo(){
    }else{
       return 0;                                                               //returns 0 if RX fifo is empty
    }
+}
+
+/************************************************************************************************/
+
+void NRF24::setPayloadSize( uint8_t size ){
+   payload_size = size;                                     //changes the payload_size
+}
+
+/************************************************************************************************/
+
+uint8_t NRF24::getPayloadSize(){
+   return payload_size;                                     //returns the value of the payload_size
 }
