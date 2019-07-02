@@ -323,6 +323,20 @@ public:
     /// many zero values that can intefear in the code.
     bool checkRXfifo();
 
+    /// \brief
+    /// sets payload_size
+    /// \details
+    /// With this function you are able to set the size of the payload_size.
+    /// Hold in mind that you can't change the payloadsize after you have called
+    /// the functions read_pipe() and write_pipe().
+    void setPayloadSize( uint8_t size );
+
+    /// \brief
+    /// gets the value of payload_size
+    /// \details
+    /// This function is used to read the value of the payload_size.
+    uint8_t getPayloadSize();
+
 };
 
 #endif // NRF24_HPP
