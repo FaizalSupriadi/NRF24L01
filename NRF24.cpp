@@ -127,7 +127,7 @@ void NRF24::start(){
 
    setAddressWidth( 5 );                  //Sets the address width to 5 bytes
 
-   setOutputPower( 3 );                   //Sets the output power to minimum
+   setOutputPower( 0 );                   //Sets the output power to minimum
 
    write_register( FEATURE, 0 );          //Sets the FEATURE register off
    write_register( DYNPD, 0 );            //Sets the dynamic payload off
