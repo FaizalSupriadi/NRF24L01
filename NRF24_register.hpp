@@ -1,3 +1,11 @@
+// File      : NRF24_register.hpp
+// Part of   : NRF24L01+ library
+// Copyright : menno.vanderjagt@student.hu.nl 2019
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at 
+// http://www.boost.org/LICENSE_1_0.txt)
+
 //commando's
 #define R_REGISTER           0x00        //Leest commando en status registers, 5 bit register map address
 #define W_REGISTER           0x20        //Schrijft commando en status registers, 5 bit register map address. Uitvoerbaar in power down
