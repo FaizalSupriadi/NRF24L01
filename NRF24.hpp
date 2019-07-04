@@ -1,4 +1,5 @@
 // File      : NRF24.hpp
+// Part of   : NRF24L01+ library
 // Copyright : menno.vanderjagt@student.hu.nl 2019
 //
 // Distributed under the Boost Software License, Version 1.0.
